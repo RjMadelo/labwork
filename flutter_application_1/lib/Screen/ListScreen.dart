@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShoplistScreen extends StatefulWidget {
   const ShoplistScreen({Key? key}) : super(key: key);
@@ -10,6 +11,10 @@ class ShoplistScreen extends StatefulWidget {
 class _ShoplistScreenState extends State<ShoplistScreen> {
   TextEditingController inputCon = TextEditingController();
   List<String> shop = [];
+  CollectionReference items = FirebaseFirestore.instance.collection('users');
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> snapshot =
+      FirebaseFirestore.instance.collection("users").snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +49,10 @@ class _ShoplistScreenState extends State<ShoplistScreen> {
                     ),
                   ),
                   TextButton(
-                      onPressed: () {
-                        setState(() {
-                          shop.add(inputCon.text);
-                        });
+                      onPressed: () async {
+                        await items.add({'item': inputCon.text}).then(
+                            (value) => print('Item Added'));
+
                         inputCon.clear();
                       },
                       child: const Text(
@@ -59,20 +64,29 @@ class _ShoplistScreenState extends State<ShoplistScreen> {
             ),
           ),
           Expanded(
-              child: ListView.builder(
-                  itemCount: shop.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(shop.elementAt(index)),
-                      trailing: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              shop.removeAt(index);
-                            });
-                          },
-                          icon: const Icon(Icons.delete_outline_rounded)),
-                    );
-                  }))
+              child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return const Text('Loading...');
+                      default:
+                        return ListView(
+                          children: snapshot.data!.docs
+                              .map((DocumentSnapshot snapshot) {
+                            return ListTile(
+                              title: Text(snapshot['users']),
+                            );
+                          }).toList(),
+                        );
+                    }
+                  })),
         ],
       ),
     );
