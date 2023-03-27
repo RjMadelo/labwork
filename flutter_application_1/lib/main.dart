@@ -1,22 +1,18 @@
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
+import 'Screen/ListScreen.dart';
 
-void main() {
-  runApp(LabWorkMain());
+void main() async {
+  runApp(const Assignment1());
 }
 
-class LabWorkMain extends StatelessWidget {
-  const LabWorkMain({super.key});
+class Assignment1 extends StatelessWidget {
+  const Assignment1({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Column(
-          children: [],
-        ),
-      ),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ShoplistScreen(),
     );
   }
 }
